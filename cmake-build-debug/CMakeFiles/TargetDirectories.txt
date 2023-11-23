@@ -1,0 +1,3 @@
+D:/DSA/JJKRestaurant_2/cmake-build-debug/CMakeFiles/JJKRestaurant_2.dir
+D:/DSA/JJKRestaurant_2/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/DSA/JJKRestaurant_2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
