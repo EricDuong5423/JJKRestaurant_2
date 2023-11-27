@@ -7,37 +7,6 @@ class AVL_HuffTree;
 class GOJO_restaurant;
 class Sukuna_restaurant;
 
-class JJK_restaurant{
-    GOJO_restaurant *Hash_Restaurant;
-    Sukuna_restaurant*Heap_Restaurant;
-    public:
-    JJK_restaurant() {
-        Heap_Restaurant = nullptr;
-        Hash_Restaurant = nullptr;
-    }
-//-------------------------------Dành cho cả 2 nhà hàng-------------------------------
-    void LAPSE(string NAME){
-
-    }
-    void HAND(){
-
-    }
-//-------------------------------Dành cho nhà hàng GOJO-------------------------------
-    void KOKUSEN(){
-
-    }
-    void LIMITLESS(int NUM){
-
-    }
-//-------------------------------Dành cho nhà hàng SUKUNA------------------------------
-    void KEITEIKEN(int NUM){
-
-    }
-    void CLEAVE(int NUM){
-
-    }
-};
-
 class GOJO_restaurant{
         class BST_Tree;
     private:
@@ -52,7 +21,7 @@ class GOJO_restaurant{
             for(int i = 1; i < MAX_SIZE+1; i++)GOJO_sector[i].DELETE();
         }
         void LIMITLESS_print(int NUM){
-            if(NUM <= 0 || NUM > MAX_SIZE + 1)return;
+            if(NUM <= 0 || NUM > MAX_SIZE)return;
             GOJO_sector[NUM].PRINT_Inorder();
         }
     private:
@@ -82,7 +51,7 @@ class GOJO_restaurant{
                 }
                 unsigned long long PascalPermutate(int k, int n){
                     //Tạo một mảng có chiều dọc là n + 1 với chiều ngang là k + 1
-                    int C[n+1][k+1];
+                    vector<vector<int>>C(n+1,vector<int>(k+1,0));
                     //Không xài đệ quy vì quá lâu với số như là 15!
                     for(int i = 0; i <= n; i++){
                         for(int j = 0; j <= min(i,k); j++){
@@ -96,6 +65,7 @@ class GOJO_restaurant{
                             }
                         }
                     }
+                    return C[n][k];
                 }
                 unsigned long long FindDiffTree(Node*Root){
                     if(!Root)return 1;
@@ -118,7 +88,11 @@ class GOJO_restaurant{
                     }
                     //Sau khi tìm xong
                     //TODO:Nếu như nhánh cây chỉ có 1 con
-                    if(!Root->left){
+                    if(!Root->left && !Root->right){
+                        delete Root;
+                        return nullptr;
+                    }
+                    else if(!Root->left){
                         //Nhánh cây chỉ có con bên phải
                         //TODO:Lấy nhánh phải làm tổ tiên luôn
                         Node*temp = Root->right;
@@ -205,4 +179,45 @@ class GOJO_restaurant{
                         Node(int result):result(result),left(nullptr),right(nullptr){};
                 };
         };
+};
+
+class Sukuna_restaurant{
+
+};
+
+class JJK_restaurant{
+    private:
+        GOJO_restaurant BST;
+        Sukuna_restaurant Heap;
+    public:
+        JJK_restaurant() {
+
+        }
+//-------------------------------Dành cho cả 2 nhà hàng-------------------------------
+        void LAPSE(string NAME){
+            int result = stoi(NAME);
+            if(result % 2 != 0){
+                BST.INVITE_Sector(result);
+            }
+            else{
+
+            }
+        }
+        void HAND(){
+
+        }
+//-------------------------------Dành cho nhà hàng GOJO-------------------------------
+        void KOKUSEN(){
+            BST.KOKUSEN_kick();
+        }
+        void LIMITLESS(int NUM){
+            BST.LIMITLESS_print(NUM);
+        }
+//-------------------------------Dành cho nhà hàng SUKUNA------------------------------
+        void KEITEIKEN(int NUM){
+
+        }
+        void CLEAVE(int NUM){
+
+        }
 };
