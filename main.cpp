@@ -1,13 +1,12 @@
 #include "main.h"
 #include "restaurant.cpp"
 
-const int startProgam = 1;
-const int endProgam = 200;
+const int startProgam = 201;
+const int endProgam = 400;
 
 void simulate(string filename)
 {
-    JJK_restaurant* oprerate = NULL;
-
+    solution.flush();
     //* nhập file
     ifstream ss(filename);
     if (ss.fail())
@@ -15,51 +14,57 @@ void simulate(string filename)
         cout << "ERROR: " << filename << endl;
         return;
     }
-    string str, maxsize, name;
+
+
+    string str, name;
     int num;
-    int i = 1;
+    testrun = 1;
+
+    ss >> str;
+    ss >> MAX_SIZE; //* nhập maxsize đầu tiên
+    JJK_restaurant* Operator = new JJK_restaurant();
+    // //* xử lí file
     while (ss >> str)
     {
-        if (str == "MAXSIZE") 	// MAXSIZE <NUM>
-        {
-            ss >> maxsize;
-            MAX_SIZE = stoi(maxsize);
-            oprerate = new JJK_restaurant();
-        }
-        else if (str == "LAPSE") // LAPSE <NAME>
+        if (str == "LAPSE") // LAPSE <NAME>
         {
             ss >> name;
-            oprerate->LAPSE(name);
+            Operator->LAPSE(name);
         }
         else if (str == "KOKUSEN") // KOKUSEN
         {
-            oprerate->KOKUSEN();
+            Operator->KOKUSEN();
         }
         else if (str == "KEITEIKEN") // KEITEIKEN <NUM>
         {
             ss >> num;
-            oprerate->KEITEIKEN(num);
+            solution << "KEITEIKEN " + to_string(num) +" : LINE " << testrun << "\n";
+            Operator->KEITEIKEN(num);
+            solution << '\n';
         }
         else if (str == "HAND") // HAND
         {
-            oprerate->HAND();
+            solution << "HAND : LINE " << testrun << "\n";
+            Operator->HAND();
+            solution << '\n';
         }
         else if (str == "LIMITLESS") // LIMITLESS <NUM>
         {
             ss >> num;
-            solution << "LIMITLESS " + to_string(num) +" : LINE " << i << "\n";
-            oprerate->LIMITLESS(num);
+            solution << "LIMITLESS " + to_string(num) +" : LINE " << testrun << "\n";
+            Operator->LIMITLESS(num);
             solution << '\n';
         }
         else if (str == "CLEAVE") // CLEAVE <NUM>
         {
             ss >> num;
-            oprerate->CLEAVE(num);
+            solution << "CLEAVE " + to_string(num) +" : LINE " << testrun << "\n";
+            Operator->CLEAVE(num);
+            solution << '\n';
         }
-        i++;
+        testrun++;
     }
-
-    delete oprerate;
+    delete Operator;
 }
 
 
@@ -96,31 +101,17 @@ void printTestFail(int i)
     ifstream read_solution_you(file_solution_you);
     ifstream read_solution(file_solution);
     string s1, s2;
-    int k = 1;
+    int k = 0;
     while (read_solution_you >> s1 && read_solution >> s2)
     {
+        if(s1 == "CLEAVE" || s1 == "KEITEIKEN") k ++;
         if (s1 != s2)
         {
-            cout << "fail test " << i << " line in input" << k << endl;
-            break;
+            cout << "\nfail test " << i << " : line " << k <<" in ouput"  << endl;
+            return;
         }
-        if (s1 == "LIGHT")
-        {
-            read_solution_you >> s1;
-            read_solution >> s2;
-            read_solution_you >> s1;
-            read_solution >> s2;
-            read_solution_you >> s1;
-            read_solution >> s2;
-        }
-        else if (s1 == "DOMAIN_EXPANSION" || s1 == "REVERSAL")
-        {
-            read_solution_you >> s1;
-            read_solution >> s2;
-            read_solution_you >> s1;
-            read_solution >> s2;
-        }
-        k++;
+        if(s1 == "CLEAVE" || s1 == "Heap" || s1 == "list" || s1 == "customers" || s1 == "KEITEIKEN" || s1 == "remove")
+            k ++;
     }
     if (read_solution_you >> s1 || read_solution >> s2)
     {
@@ -218,11 +209,11 @@ int main(int argc, char *argv[])
         }
         else
         {
-
             int i = stoi(s);
             cout << i << " ";
             solution.open(folder_solution_you + to_string(i) + ".txt");
             simulate(folder_input + to_string(i) + ".txt");
+
             solution.close();
             cout << "\nOK: runs without errors\n" << endl;
             comparefile(stoi(s), stoi(s));

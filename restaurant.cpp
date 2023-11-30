@@ -13,7 +13,7 @@ class GOJO_restaurant{
         vector<BST_Tree>GOJO_sector;
     public:
         GOJO_restaurant():GOJO_sector(MAX_SIZE+1){};
-        void INVITE_Sector(int result){
+        void LAPSE_invite(int result){
             int ID = result%MAX_SIZE + 1;
             GOJO_sector[ID].INSERT(result);
         }
@@ -51,6 +51,7 @@ class GOJO_restaurant{
                 }
                 unsigned long long PascalPermutate(int k, int n){
                     //Tạo một mảng có chiều dọc là n + 1 với chiều ngang là k + 1
+                    if(n == 0 || k == n)return 1;
                     vector<vector<int>>C(n+1,vector<int>(k+1,0));
                     //Không xài đệ quy vì quá lâu với số như là 15!
                     for(int i = 0; i <= n; i++){
@@ -182,7 +183,177 @@ class GOJO_restaurant{
 };
 
 class Sukuna_restaurant{
+    class Node;
+    private:
+        vector<Node*>Sukuna_sector;
+        list<Node*>Least_Recent_Used;
+    private:
+        int Index(Node*node){
+            if(Least_Recent_Used.front() == node)return 0;
+            if(Least_Recent_Used.back() == node)return Least_Recent_Used.size() - 1;
 
+            list<Node*>::iterator it;
+            int index = 0;
+            for(it = Least_Recent_Used.begin(); it != Least_Recent_Used.end(); it++){
+                if(*it == node)return index;
+                index++;
+            }
+            return index;
+        }
+        int Parent(int i){return (i - 1)/2;}
+        int Left(int i){return i*2 + 1;}
+        int Right(int i){return i*2 + 2;}
+        void reHeapUp(int index){
+            if(index > 0){
+                if(Sukuna_sector[Parent(index)]->head.size() > Sukuna_sector[index]->head.size()){
+                    swap(Sukuna_sector[index],Sukuna_sector[Parent(index)]);
+                    reHeapUp(Parent(index));
+                }
+            }
+        }
+        void reHeapDown(int index){
+            int left = Left(index);
+            int right = Right(index);
+
+            int smallest = index;
+
+            if(left < Sukuna_sector.size()){
+                if(right < Sukuna_sector.size() &&
+                (Sukuna_sector[right]->size() < Sukuna_sector[left]->size() ||
+                (Sukuna_sector[right]->size() == Sukuna_sector[left]->size() && Index(Sukuna_sector[right]) > Index(Sukuna_sector[left])))){
+                    smallest = right;
+                }
+                else{
+                    smallest = left;
+                }
+            }
+
+            if(Sukuna_sector[smallest]->size() < Sukuna_sector[index]->size() ||
+            (Sukuna_sector[smallest]->size() == Sukuna_sector[index]->size() && Index(Sukuna_sector[smallest]) > Index(Sukuna_sector[index]))){
+                swap(Sukuna_sector[smallest], Sukuna_sector[index]);
+                reHeapDown(smallest);
+            }
+        }
+        void moveTop(Node*targetNode){
+            Least_Recent_Used.remove(targetNode);
+            Least_Recent_Used.push_front(targetNode);
+        }
+        void removeNode(Node*targetNode){
+            Least_Recent_Used.remove(targetNode);
+        }
+    public:
+        Sukuna_restaurant(){};
+        void LAPSE_invite(int Result){
+            int ID = Result%MAX_SIZE+1;
+            int index = 0;
+            while(index < Sukuna_sector.size()){
+                if(Sukuna_sector[index]->ID == ID){
+                    break;
+                }
+                index++;
+            }
+            if(index == Sukuna_sector.size()){
+                Sukuna_sector.push_back(new Node(ID));
+                index = Sukuna_sector.size() - 1;
+                Sukuna_sector[index]->insert(Result);
+                Least_Recent_Used.push_front(Sukuna_sector[index]);
+                reHeapUp(index);
+            }
+            else{
+                Sukuna_sector[index]->insert(Result);
+                moveTop(Sukuna_sector[index]);
+                reHeapDown(index);
+            }
+        }
+        void KEITEIKEN_kick(int NUM){
+            if(Sukuna_sector.empty())return;
+
+            int kicknumber = NUM;
+            while(!Sukuna_sector.empty() && kicknumber != 0){
+                solution << "remove customers in the area ID = " << Sukuna_sector[0]->ID << ": ";
+                Sukuna_sector[0]->remove(NUM);
+                solution << "\n";
+
+                if(Sukuna_sector[0]->size() == 0){
+                    swap(Sukuna_sector[0], Sukuna_sector[Sukuna_sector.size() - 1]);
+                    removeNode(Sukuna_sector[Sukuna_sector.size()-1]);
+                    delete Sukuna_sector[Sukuna_sector.size() - 1];
+                    Sukuna_sector.pop_back();
+                    reHeapDown(0);
+                }
+                else{
+                    reHeapDown(0);
+                }
+                kicknumber--;
+            }
+        }
+        void print_pre_order(int index, int number)
+        {
+            if(index >= this->Sukuna_sector.size()) return;
+
+            this->Sukuna_sector[index]->print(number);
+            print_pre_order(index * 2 + 1, number);
+            print_pre_order(index * 2 + 2, number);
+        }
+        void CLEAVE_print(int NUM){
+            if(NUM <= 0)return;
+            solution << "Heap : ";
+            vector<Node*>::iterator it = Sukuna_sector.begin();
+            for(; it != Sukuna_sector.end(); it++){
+                int order = 0;
+                list<Node*>::iterator ix = Least_Recent_Used.begin();
+                for(;ix != Least_Recent_Used.end(); ix++){
+                    if(*ix == *it)break;
+                    order++;
+                }
+                solution << it.operator*()->ID << "(len=" << it.operator*()->size() << ",index=" << order << ")" << " ";
+            }
+            solution << "\n";
+
+            solution << "Heap : ";
+            for(it = Sukuna_sector.begin(); it != Sukuna_sector.end(); it++){
+                solution << it.operator*()->ID << " ";
+            }
+            solution << "\n";
+            solution << "list LRU : ";
+            list<Node*>::iterator ix;
+            for(ix = Least_Recent_Used.begin(); ix != Least_Recent_Used.end(); ix++){
+                solution << ix.operator*()->ID << " ";
+            }
+            solution << "\n";
+
+            print_pre_order(0, NUM);
+        }
+    private:
+        class Node{
+        private:
+            int ID;
+            list<int>head;
+            friend class Sukuna_restaurant;
+        public:
+            Node(int ID):ID(ID){};
+            ~Node(){};
+            int size()const{return head.size();}
+            void insert(int Result){
+                head.push_front(Result);
+            }
+            void remove(int NUM){
+                int timekick = NUM;
+                while(!head.empty() && timekick != 0){
+                    solution << head.back() << " ";
+                    head.pop_back();
+                    timekick--;
+                }
+            }
+            void print(int NUM){
+                solution << "customers in the area ID = " << ID << ": ";
+                for(list<int>::iterator it = head.begin(); NUM > 0 && it != head.end(); ++it, --NUM)
+                {
+                    solution << *it << " ";
+                }
+                solution << "\n";
+            }
+        };
 };
 
 class JJK_restaurant{
@@ -196,11 +367,11 @@ class JJK_restaurant{
 //-------------------------------Dành cho cả 2 nhà hàng-------------------------------
         void LAPSE(string NAME){
             int result = stoi(NAME);
-            if(result % 2 != 0){
-                BST.INVITE_Sector(result);
+            if(result % 2 == 0){
+                Heap.LAPSE_invite(result);
             }
             else{
-
+                BST.LAPSE_invite(result);
             }
         }
         void HAND(){
@@ -215,9 +386,9 @@ class JJK_restaurant{
         }
 //-------------------------------Dành cho nhà hàng SUKUNA------------------------------
         void KEITEIKEN(int NUM){
-
+            Heap.KEITEIKEN_kick(NUM);
         }
         void CLEAVE(int NUM){
-
+            Heap.CLEAVE_print(NUM);
         }
 };
