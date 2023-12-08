@@ -3,7 +3,6 @@
 int MAX_SIZE = 0;
 
 class JJK_restaurant;
-class AVL_HuffTree;
 class GOJO_restaurant;
 class Sukuna_restaurant;
 
@@ -356,23 +355,242 @@ class Sukuna_restaurant{
         };
 };
 
+class HuffTree_AVL{
+    private:
+        class Node;
+    private:
+        Node*root = nullptr;
+    public:
+    static bool check(pair<char,int>a, pair<char,int>b){
+        if(a.second == b.second){
+            if(isupper(a.first) && islower(b.first)){
+                return true;
+            }
+            else if (islower(a.first) && isupper(b.first)){
+                return false;
+            }
+            return a.first > b.first;
+        }
+        else return a.second > b.second;
+    }
+    vector<pair<char, int>> string_Processing(string& name){
+        int name_size = name.size();
+        map<char,int> freq_map;
+        for(int i = 0; i < name_size; i++){
+            freq_map[name[i]] += 1;
+        }
+        vector<pair<char,int>>result(freq_map.begin(),freq_map.end());
+        for (int i = 0; i < name_size; i++){
+            if (isupper(name[i]))
+                name[i] = (name[i] + freq_map[name[i]] - 65) % 26 + 65;
+            else
+                name[i] = (name[i] + freq_map[name[i]] - 97) % 26 + 97;
+        }
+        int result_size = result.size();
+        for(int i = 0; i < result_size; i++){
+            if(isupper(result[i].first)){
+                result[i].first = (result[i].first + result[i].second - 65) % 26 + 65;
+            }
+            else{
+                result[i].first = (result[i].first + result[i].second - 97) % 26 + 97;
+            }
+        }
+        freq_map.clear();
+        for(int i = 0; i < result_size; i++){
+            freq_map[result[i].first] += result[i].second;
+        }
+        result.clear();
+        result = vector<pair<char,int>>(freq_map.begin(),freq_map.end());
+        sort(result.begin(),result.end(), check);
+        return result;
+    }
+    int height(Node* node){
+        if (node == nullptr) {
+            return 0;
+        }
+        return 1 + max(height(node->left), height(node->right));
+    }
+    Node* rotateLeft(Node* subroot)
+    {
+        //TODO: Rotate and return new root after rotate
+        Node*rightSucc = subroot->right;
+        Node*leftRightSucc = rightSucc->left;
+
+        subroot->right = leftRightSucc;
+        rightSucc->left = subroot;
+
+        return rightSucc;
+    };
+    Node* rotateRight(Node* subroot)
+    {
+        Node*leftSucc = subroot->left;
+        Node*rightLeftSucc = leftSucc->right;
+
+        subroot->left = rightLeftSucc;
+        leftSucc->right = subroot;
+
+        return leftSucc;
+    };
+    int getBalance(Node*subroot){
+        if(!subroot) return 0;
+        return height(subroot->left)- height(subroot->right);
+    }
+    Node* balanceNode(Node* root, int& count)
+    {
+        //TODO
+        if(count >= 3 || !root)return root;
+        int balance_root = getBalance(root),
+                balance_left = getBalance(root->left),
+                balance_right = getBalance(root->right);
+        if(root->left && balance_root > 1 && balance_left >= 0){
+            count++;
+            return rotateRight(root);
+        }
+        if(root->left && balance_root > 1 && balance_left < 0){
+            root->left = rotateLeft(root->left);
+            count+=2;
+            if(count >= 4)return root;
+            return rotateRight(root);
+        }
+        if(root->right && balance_root < -1 && balance_right <= 0){
+            count++;
+            return rotateLeft(root);
+        }
+        if (root->right && balance_root < -1 && balance_right > 0){
+            root->right = rotateRight(root->right);
+            count+=2;
+            if(count >= 4)return root;
+            return rotateLeft(root);
+        }
+        return root;
+    }
+    Node* balanceTree(Node* node, int& count)
+    {
+        //TODO
+        if(count >= 3 || !node)return node;
+        node = balanceNode(node,count);
+        node->left = balanceTree(node->left, count);
+        node->right = balanceTree(node->right,count);
+        return node;
+    }
+    Node* buildHuff(vector<pair<char, int>> freq)
+    {
+        vector<Node*> build;
+        for(int i = 0; i < freq.size(); i++){
+            Node* newNode = new Node(freq[i].second,freq[i].first);
+            build.push_back(newNode);
+        }
+
+        while(build.size() > 1)
+        {
+            int count = 0;
+            Node* LWN = build.back();
+            build.pop_back();
+            Node* ndLWN = build.back();
+            build.pop_back();
+            Node*newNode = new Node(LWN->weight + ndLWN->weight,'\0',LWN,ndLWN);
+            newNode = balanceTree(newNode,count);
+            vector<Node*>::iterator it;
+            if(build.empty())build.push_back(newNode);
+            else{
+                for(it = build.begin(); it != build.end(); it++){
+                    if(newNode->weight >= it.operator*()->weight){
+                        build.insert(it,newNode);
+                        break;
+                    }
+                }
+                if(it == build.end())build.push_back(newNode);
+            }
+        }
+        return build[0];
+    }
+    void encodingHuffman_rec(vector<string>& encoding, Node* node, string s = "")
+    {
+        //TODO
+        if(node->left)encodingHuffman_rec(encoding,node->left,s+"0");
+        if(node->right)encodingHuffman_rec(encoding,node->right,s+"1");
+        if(node->isChar())encoding[node->c] = s;
+    }
+    int encodingHuffman(Node * root,string nameCaesar)
+    {
+        if(root->left == nullptr && root->right == nullptr) return 0;
+        vector<string> encoding(256, "");
+        encodingHuffman_rec(encoding, root);
+        string newString = "";
+        for(int i = 0; i < nameCaesar.size(); i++)newString += encoding[nameCaesar[i]];
+        reverse(newString.begin(),newString.end());
+        int size = newString.size();
+        newString = newString.substr(0,min(size,10));
+        int result = stoi(newString,0,2);
+        return result;
+    }
+    int encode(string name){
+        if(name.length() < 3) return -1;
+        vector<pair<char, int>> freq = this->string_Processing(name);
+        solution << "freq     : {";
+        for (int i = 0; i <freq.size();i++){
+            if(i == freq.size() - 1)  solution << "{" <<"'"<< freq[i].first <<"'" << "," << freq[i].second << "}";
+            else  solution << "{" <<"'"<< freq[i].first <<"'" << "," << freq[i].second << "},";
+        }
+        solution << "}"<<endl;
+        root = this->buildHuff(freq);
+
+        if(root->left == nullptr && root->right == nullptr) return 0;
+        this->print();
+        solution << "name   = " << name << endl;
+        int result = this->encodingHuffman(root ,name);
+        solution << "result = " << result << endl;
+        return -1;
+        }
+    void rec_print(const Node* tree) {
+        if (tree == nullptr) {
+            return;
+        }
+        if(tree->c) solution << "[" << tree->weight << "," << tree->c << "]";
+        else solution << "[" << tree->weight << "]";
+
+        if (tree->left != nullptr || tree->right != nullptr) {
+            solution << "(";
+            rec_print(tree->left);
+            solution << ",";
+            rec_print(tree->right);
+            solution << ")";
+        }
+    }
+    void print()
+    {
+        solution << "root : ";
+        rec_print(root);
+        solution << '\n';
+    }
+
+    private:
+        class Node{
+        public:
+            int weight;
+            char c;
+            Node* left;
+            Node* right;
+            friend class HuffTree_AVL;
+        public:
+            Node(int weight, char c = '\0',Node* left = nullptr, Node* right = nullptr ): weight(weight), c(c), left(left), right(right) {}
+            bool isChar() const { return c != '\0'; }
+        };
+};
+
 class JJK_restaurant{
     private:
         GOJO_restaurant BST;
         Sukuna_restaurant Heap;
+        HuffTree_AVL new_arrive_guest;
     public:
         JJK_restaurant() {
 
         }
 //-------------------------------Dành cho cả 2 nhà hàng-------------------------------
         void LAPSE(string NAME){
-            int result = stoi(NAME);
-            if(result % 2 == 0){
-                Heap.LAPSE_invite(result);
-            }
-            else{
-                BST.LAPSE_invite(result);
-            }
+            int result = new_arrive_guest.encode(NAME);
+            return;
         }
         void HAND(){
 

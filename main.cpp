@@ -1,8 +1,8 @@
 #include "main.h"
 #include "restaurant.cpp"
 
-const int startProgam = 201;
-const int endProgam = 400;
+const int startProgam = 401;
+const int endProgam = 600;
 
 void simulate(string filename)
 {
@@ -17,54 +17,54 @@ void simulate(string filename)
 
 
     string str, name;
-    int num;
-    testrun = 1;
+    int num, i = 1;
 
     ss >> str;
     ss >> MAX_SIZE; //* nhập maxsize đầu tiên
-    JJK_restaurant* Operator = new JJK_restaurant();
+    JJK_restaurant* NOT_LIKE_CODE = new JJK_restaurant();
     // //* xử lí file
     while (ss >> str)
     {
         if (str == "LAPSE") // LAPSE <NAME>
         {
             ss >> name;
-            Operator->LAPSE(name);
+            solution << "LAPSE : LINE " << i << "\n";
+            NOT_LIKE_CODE->LAPSE(name);
         }
         else if (str == "KOKUSEN") // KOKUSEN
         {
-            Operator->KOKUSEN();
+            NOT_LIKE_CODE->KOKUSEN();
         }
         else if (str == "KEITEIKEN") // KEITEIKEN <NUM>
         {
             ss >> num;
-            solution << "KEITEIKEN " + to_string(num) +" : LINE " << testrun << "\n";
-            Operator->KEITEIKEN(num);
+            solution << "KEITEIKEN " + to_string(num) +" : LINE " << i << "\n";
+            NOT_LIKE_CODE->KEITEIKEN(num);
             solution << '\n';
         }
         else if (str == "HAND") // HAND
         {
-            solution << "HAND : LINE " << testrun << "\n";
-            Operator->HAND();
+            solution << "HAND : LINE " << i << "\n";
+            NOT_LIKE_CODE->HAND();
             solution << '\n';
         }
         else if (str == "LIMITLESS") // LIMITLESS <NUM>
         {
             ss >> num;
-            solution << "LIMITLESS " + to_string(num) +" : LINE " << testrun << "\n";
-            Operator->LIMITLESS(num);
+            solution << "LIMITLESS " + to_string(num) +" : LINE " << i << "\n";
+            NOT_LIKE_CODE->LIMITLESS(num);
             solution << '\n';
         }
         else if (str == "CLEAVE") // CLEAVE <NUM>
         {
             ss >> num;
-            solution << "CLEAVE " + to_string(num) +" : LINE " << testrun << "\n";
-            Operator->CLEAVE(num);
+            solution << "CLEAVE " + to_string(num) +" : LINE " << i << "\n";
+            NOT_LIKE_CODE->CLEAVE(num);
             solution << '\n';
         }
-        testrun++;
+        i++;
     }
-    delete Operator;
+    delete NOT_LIKE_CODE;
 }
 
 
@@ -101,17 +101,15 @@ void printTestFail(int i)
     ifstream read_solution_you(file_solution_you);
     ifstream read_solution(file_solution);
     string s1, s2;
-    int k = 0;
+    int k = 1;
     while (read_solution_you >> s1 && read_solution >> s2)
     {
-        if(s1 == "CLEAVE" || s1 == "KEITEIKEN") k ++;
         if (s1 != s2)
         {
-            cout << "\nfail test " << i << " : line " << k <<" in ouput"  << endl;
+            cout << "\nfail test " << i << " " << "https://www.diffchecker.com/text-compare/"; // << " : line " << k <<" in ouput"  << endl;
             return;
         }
-        if(s1 == "CLEAVE" || s1 == "Heap" || s1 == "list" || s1 == "customers" || s1 == "KEITEIKEN" || s1 == "remove")
-            k ++;
+        k++;
     }
     if (read_solution_you >> s1 || read_solution >> s2)
     {
